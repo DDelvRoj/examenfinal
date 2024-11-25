@@ -37,6 +37,7 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
   const handleEliminar = async () => {
     const eliminar = async () => {
       setCargando(true);
+      // hola
       console.log(item.id);
       firestore().collection('data').doc(item.id).delete().then(()=>{
         Alert.alert("Eliminado", "El registro ha sido eliminado.");
