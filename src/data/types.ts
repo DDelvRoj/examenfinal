@@ -1,6 +1,7 @@
-export interface Usuario {
+export interface Producto {
     id?:string,
-    title:string,
-    description:string,
+    nombre:string,
+    precio:string,
+    cantidad:string,
     [key:string]:any
 }

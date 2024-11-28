@@ -7,13 +7,14 @@ import DetalleScreen from "../Screens/DetalleScreen";
 import { useEffect } from "react";
 import { Alert, BackHandler } from "react-native";
 import RecuperarScreen from "../Screens/RecuperarScreen";
+import { Producto } from "../data/types";
 
 export type RootStackParamList = {
     Home: undefined;
     Login: undefined; 
     Registro: undefined;
     Recuperar: undefined;
-    Detalle : {item:{id:string, title:string, description:string}}
+    Detalle : {item:Producto}
 };
 
 

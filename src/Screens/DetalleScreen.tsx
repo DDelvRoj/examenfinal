@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator, Modal } from "react-native";
 import styles from "../Styles/Styles";
 import { RootStackParamList } from "../Navigators/Navigator";
 import Icon from "react-native-vector-icons/Ionicons";
 import firestore from "@react-native-firebase/firestore";
+import { Producto } from "../data/types";
 
 export type DetalleScreenProps = NativeStackScreenProps<RootStackParamList, "Detalle">;
 
@@ -14,19 +15,16 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
 
   const { item } = route.params;
   console.log('Item', item);
+
+  const [modificar, setModificar] = useState(false);
+
+  const [data, setData] = useState<Producto>(item);
+
   
+  const noMostrar = ["id"];
 
-  // Estado para manejar el modo de edición
-  const [isEditing, setIsEditing] = useState(false);
-  const [data, setData] = useState(item); // JSON editable
+  const filteredData = Object.entries(data).filter(([key]) => !noMostrar.includes(key));
 
-  // Claves a excluir de la vista
-  const excludedKeys = ["id"]; // Agrega aquí las claves que quieras excluir
-
-  // Filtrar datos excluyendo claves no deseadas
-  const filteredData = Object.entries(data).filter(([key]) => !excludedKeys.includes(key));
-
-  // Función para manejar cambios
   const handleInputChange = (key: string, value: string) => {
     setData((prevData: any) => ({
       ...prevData,
@@ -37,11 +35,10 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
   const handleEliminar = async () => {
     const eliminar = async () => {
       setCargando(true);
-      // hola
       console.log(item.id);
-      firestore().collection('data').doc(item.id).delete().then(()=>{
+      firestore().collection('productos').doc(item.id).delete().then(()=>{
         Alert.alert("Eliminado", "El registro ha sido eliminado.");
-        setIsEditing(false);
+        setModificar(false);
         navigation.goBack();
       })
       .catch((err)=>{
@@ -51,7 +48,7 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
         setCargando(false);
       })
     }
-    Alert.alert("¿Eliminar?", "La información será eliminada. ¿Confirmar?", [
+    Alert.alert("¿Eliminar?", "La producto será eliminada. ¿Confirmar?", [
       {
         text:'Confirmar',
         onPress: async ()=>await eliminar(),
@@ -65,16 +62,15 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
   };
 
 
-  // Guardar cambios
   const handleModificar = async () => {
     const modificar = async () => {
       setCargando(true);
       console.log(item.id);
-      firestore().collection('data').doc(item.id).update(data).then(()=>{
+      firestore().collection('productos').doc(item.id).update(data).then(()=>{
         
         
         Alert.alert("Guardado", "Los cambios han sido guardados.");
-        setIsEditing(false);
+        setModificar(false);
       })
       .catch((err)=>{
         Alert.alert("Error", err.code);
@@ -83,7 +79,7 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
         setCargando(false);
       })
     }
-    Alert.alert("¿Modificar?", "La información será modificada. ¿Confirmar?", [
+    Alert.alert("¿Modificar?", "El producto será modificada. ¿Confirmar?", [
       {
         text:'Confirmar',
         onPress: async ()=>await modificar(),
@@ -99,17 +95,16 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
   // Cancelar edición
   const cancelChanges = () => {
     setData(item); // Restaurar valores originales
-    setIsEditing(false);
+    setModificar(false);
   };
 
-  // Renderizar cada clave-valor del JSON
   const renderItem = ({ item }: { item: [string, string] }) => {
     const [key, value] = item;
 
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.key}>{key.toUpperCase()}</Text>
-        {isEditing ? (
+        {modificar ? (
           <TextInput
             style={styles.input}
             value={value}
@@ -134,29 +129,36 @@ const DetalleScreen: React.FC<DetalleScreenProps> = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Detalles</Text>
       <FlatList
-        data={filteredData as any} // Usar datos filtrados
+        data={filteredData as any} 
         keyExtractor={([key]) => key}
         renderItem={renderItem}
       />
-      {isEditing ? (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleModificar}>
-            <Text style={styles.buttonText}><Icon name="paper-plane" textBreakStrategy="simple" size={20}/> Guardar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={cancelChanges}>
-            <Text style={styles.buttonText}><Icon name="close" textBreakStrategy="simple" size={20}/> Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+      <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.editButton} onPress={() => setModificar(true)}>
             <Text style={styles.buttonText}><Icon name="pencil" textBreakStrategy="simple" size={20}/> Editar</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={async ()=> await handleEliminar()}>
             <Text style={styles.buttonText}><Icon name="trash" textBreakStrategy="simple" size={20}/> Eliminar</Text>
           </TouchableOpacity>
+      </View>
+      <Modal visible={modificar} onDismiss={()=>setModificar(false)}>
+        <View style={styles.container}>
+          <FlatList
+          data={filteredData as any} 
+          keyExtractor={([key]) => key}
+          renderItem={renderItem}
+          />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleModificar}>
+              <Text style={styles.buttonText}><Icon name="paper-plane" textBreakStrategy="simple" size={20}/> Guardar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={cancelChanges}>
+              <Text style={styles.buttonText}><Icon name="close" textBreakStrategy="simple" size={20}/> Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
+      </Modal>
+      
     </View>
   );
 };

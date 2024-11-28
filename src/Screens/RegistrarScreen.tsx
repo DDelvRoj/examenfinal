@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } fro
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../Navigators/Navigator";
 import styles from "../Styles/Styles";
-import { Usuario } from "../data/types";
+import { Producto } from "../data/types";
 
 import firestore from '@react-native-firebase/firestore';
 
@@ -17,18 +17,21 @@ const RegistrarScreen:React.FC<RegistrarScreenProps> = ({})=>{
 
     const [cargando, setCargando] = useState(false);
 
-    const [entradas, setEntradas] = useState<Usuario>({id:'',description:'',title:''});
+    const vacio: Producto = {
+      cantidad:'',
+      nombre:'',
+      precio:''
+    };
+    const [entradas, setEntradas] = useState<Producto>(vacio);
 
 
     const handleRegistrar = async ()=>{
      
       const registrar = async () => {
         setCargando(true);
-        firestore().collection('data').add(entradas).then((data)=>{
+        firestore().collection('productos').add(entradas).then((data)=>{
           entradas.id = data.id;
-          
-
-          Alert.alert('Éxito', "Su información fue guardado correctamente.")
+          Alert.alert('Éxito', "Su producto fue guardado correctamente.")
         })
         .catch((error)=>{
           Alert.alert('Error',error.code)
@@ -37,7 +40,7 @@ const RegistrarScreen:React.FC<RegistrarScreenProps> = ({})=>{
           setCargando(false);
         });
       }
-      Alert.alert('Registrar','¿Desea registrar información?',
+      Alert.alert('Registrar','¿Desea registrar producto?',
         [
           {
             text:'Confirmar',
@@ -63,38 +66,51 @@ const RegistrarScreen:React.FC<RegistrarScreenProps> = ({})=>{
     return(
         <View style={styles.container}>
             <Text style={styles.title}>
-                Registrar
+                Registrar Productos
             </Text>
 
             <TextInput
                 style={styles.input}
-                placeholder="Titulo"
+                placeholder="Nombre"
                 placeholderTextColor="#aaa"
                 keyboardType="default"
                 autoCapitalize="none"
-                value={entradas.title}
+                value={entradas.nombre}
                 onChangeText={(texto)=>{
                   const data = {...entradas};
-                  data.title = texto;
+                  data.nombre = texto;
                   setEntradas(data)
                 }}
             />
 
             <TextInput
                 style={styles.input}
-                placeholder="Descripcion"
+                placeholder="Precio"
                 placeholderTextColor="#aaa"
-                keyboardType="default"
+                keyboardType="numeric"
                 autoCapitalize="none"
-                value={entradas.description}
+                value={entradas.precio} 
                 onChangeText={(texto)=>{
                   const data = {...entradas};
-                  data.description = texto;
+                  data.precio = texto;
+                  setEntradas(data)
+                }}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Cantidad"
+                placeholderTextColor="#aaa"
+                keyboardType="numeric"
+                autoCapitalize="none"
+                value={entradas.cantidad} 
+                onChangeText={(texto)=>{
+                  const data = {...entradas};
+                  data.cantidad = texto;
                   setEntradas(data)
                 }}
             />
 
-            <TouchableOpacity style={(entradas.description.length>0 && entradas.title.length>0?styles.button:styles.buttonDisabled)} onPress={async()=>await handleRegistrar()}>
+            <TouchableOpacity style={(entradas.nombre.length>0 && entradas.precio.length>0 && entradas.cantidad.length>0 ?styles.button:styles.buttonDisabled)} onPress={async()=>await handleRegistrar()}>
                 <Text style={styles.buttonText}>Registrar</Text>
             </TouchableOpacity>
 
