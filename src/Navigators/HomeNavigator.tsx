@@ -54,19 +54,7 @@ const HomeNavigator = ()=>{
                 },
             }
         }>
-            <Tab.Screen name='Registrar' component={RegistrarScreen}
-                
-                options={
-                    {
-                        animation:'shift',
-                        tabBarIcon: ({ color, size}) => (
-                            <Icon name='home' color={color} size={size}/>
-                        ),
-                        tabBarActiveTintColor: 'tomato',
-                        tabBarInactiveTintColor: 'gray',
-                    }
-                }
-            />
+            
             <Tab.Screen name='Visualizar' component={VisualizarScreen}
 
                 options={
@@ -74,6 +62,19 @@ const HomeNavigator = ()=>{
                         animation:'shift',
                         tabBarIcon: ({ color, size}) => (
                             <Icon name="person" color={color} size={size}/>
+                        ),
+                        tabBarActiveTintColor: 'tomato',
+                        tabBarInactiveTintColor: 'gray',
+                    }
+                }
+            />
+            <Tab.Screen name='Registrar' component={RegistrarScreen}
+                
+                options={
+                    {
+                        animation:'shift',
+                        tabBarIcon: ({ color, size}) => (
+                            <Icon name='home' color={color} size={size}/>
                         ),
                         tabBarActiveTintColor: 'tomato',
                         tabBarInactiveTintColor: 'gray',

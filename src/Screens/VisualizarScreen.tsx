@@ -70,7 +70,7 @@ const VisualizarScreen:React.FC<VisualizarScreenProps> = ({})=>{
       if(registro!==nuevoRegistro)
       setRegistro(nuevoRegistro);
 
-    }, [ordenar.cantidad, ordenar.precio, registro])
+    }, [ordenar, registro])
     
 
     const renderItem = ( item:Producto) => (
